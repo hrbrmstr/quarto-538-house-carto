@@ -27,7 +27,20 @@ ojs_define(future_states = current$futureStates)
 ojs_define(stance = stance)
 ```
 
-NOTE: If you toggle the light/dark theme, you need to refresh the page so it can re-read the saved local storage value. 
+NOTE: If you toggle the light/dark theme from the upper-right-corner toggle, you need to refresh the page so it can re-read the saved local storage value. Use the button below to make it dynamic.
+
+```{ojs}
+viewof toggle = Inputs.button("Toggle Light/Dark Mode")
+```
+
+```{ojs}
+color_mode = {
+  toggle;
+  window.quartoToggleColorScheme()
+  return localStorage["quarto-color-scheme"]
+}
+
+```
 
 ```{ojs carto}
 {
@@ -72,12 +85,12 @@ NOTE: If you toggle the light/dark theme, you need to refresh the page so it can
     .append("path")
     .attr("class", (e) => {
       if (future_states.includes(e.state)) {
-        return localStorage["quarto-color-scheme"] + " district unfinished-district"
+        return color_mode + " district unfinished-district"
       } else {
         if (["Yes", "Declined to answer"].includes(stance[e.race])) {
-          return localStorage["quarto-color-scheme"] + " maga-nutjob-district"
+          return color_mode + " maga-nutjob-district"
         } else {
-          return localStorage["quarto-color-scheme"] + " district"
+          return color_mode + " district"
         }
       }
     })
