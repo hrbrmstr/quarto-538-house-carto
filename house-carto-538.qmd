@@ -1,0 +1,180 @@
+---
+title: 'House Carto (538)'
+author: "boB Rudis (@hrbrmstr)"
+format: html
+theme:
+  light: flatly
+  dark: darkly
+code-tools: true
+self-contained: false
+echo: false
+observable: "https://observablehq.com/@hrbrmstr/house-carto-538"
+---
+```{r}
+current <- jsonlite::fromJSON("current.json")
+
+stance <- current$candidates
+stance <- stance[stance$office == "Representative",]
+stance <- as.list(setNames(stance$stance, stance$race))
+```
+
+```{r}
+ojs_define(future_states = current$futureStates)
+ojs_define(stance = stance)
+```
+
+```{ojs}
+{
+  const svg = d3.create("svg").attr("width", 700).attr("height", 525);
+
+  const base_map = svg.append("g");
+
+  base_map
+    .append("g")
+    .attr("class", "state-outline")
+    .selectAll("path")
+    .data(house_carto.outlines)
+    .enter()
+    .append("path")
+    .attr("d", (t) => t.d)
+    .attr("transform", (t) =>
+      "translate(".concat(t.translate[0], ", ").concat(t.translate[1], ")")
+    )
+    .lower();
+
+  const tiles = svg.append("g");
+
+  const scale = 5;
+
+  tiles
+    .append("g")
+    .attr("class", "map")
+    .attr(
+      "transform",
+      "scale("
+        .concat(scale, ")translate(")
+        .concat(24 * scale, ",")
+        .concat(10 * scale, ")")
+    );
+
+  tiles
+    .append("g")
+    .attr("class", "districts")
+    .selectAll("path")
+    .data(house_carto.districts)
+    .enter()
+    .append("path")
+    .attr("class", (e) => {
+      if (future_states.includes(e.state)) {
+        return localStorage["quarto-color-scheme"] + " district unfinished-district"
+      } else {
+        if (["Yes", "Declined to answer"].includes(stance[e.race])) {
+          return localStorage["quarto-color-scheme"] + " maga-nutjob-district"
+        } else {
+          return localStorage["quarto-color-scheme"] + " district"
+        }
+      }
+    })
+    .attr("d", (t) =>
+      "M".concat(t.points.map((t) => t.join(" ")).join("L"), "Z")
+    )
+    .append("title")
+    .text((t) => t.race);
+
+  const labels = svg.append("g");
+
+  labels
+    .selectAll("g.labels")
+    .data(["bg", "fg"])
+    .enter()
+    .append("g")
+    .attr("class", (t) => localStorage["quarto-color-scheme"] + " labels " + t)
+    .selectAll("text")
+    .data(house_carto.labels)
+    .enter()
+    .append("text")
+    .attr("transform", (t, e) =>
+      "translate(".concat(t.x, ", ").concat(t.y, ")")
+    )
+    .text((t, e) => t.state);
+
+  return svg.node();
+}
+```
+
+```{ojs}
+house_carto = FileAttachment("house_carto.json").json()
+```
+
+```{ojs}
+css = html`<style>
+.district {
+  stroke-width: 0.5;
+  stroke: #fff;
+  fill: #d3d3d3
+}
+
+.maga-nutjob-district {
+  stroke-width: 0.5;
+  stroke: #fff;
+  fill: #980b65
+}
+
+.unfinished-district {
+  stroke-width: 0.5;
+  stroke: #fff;
+  fill: white
+}
+
+.district.alternate {
+  stroke-width: 0.5;
+  stroke: #d3d3d3;
+  fill: #fff
+}
+
+.maga-nutjob-district.alternate {
+  stroke-width: 0.5;
+  stroke: #d3d3d3;
+  fill: #980b65
+}
+
+.unfinished-district.alternate {
+  stroke-width: 0.5;
+  stroke: #fff;
+  fill: white
+}
+
+
+g.labels {
+  pointer-events: none
+}
+
+g.labels text {
+  font-family: "Comic Code Ligatures", monospace;
+  font-size: 15px
+}
+
+g.labels.bg.alternate text {
+  stroke-width: 4;
+  stroke: #222;
+  fill: #222
+}
+
+g.labels.fg.alternate text {
+  stroke: none;
+  fill: #fff
+}
+
+g.labels.bg text {
+  stroke-width: 4;
+  stroke: #fff;
+  fill: #fff
+}
+
+g.labels.fg text {
+  stroke: none;
+  fill: #222
+}
+</style>`
+```
+
