@@ -8,9 +8,13 @@ theme:
 code-tools: true
 self-contained: false
 echo: false
-observable: "https://observablehq.com/@hrbrmstr/house-carto-538"
 ---
-```{r}
+
+Ref: [538](https://projects.fivethirtyeight.com/2022-election-forecast/house/).
+
+These are the House districts where MAGA nutjob GOP folks are running for a seat in Congress.
+
+```{r read-in-data}
 current <- jsonlite::fromJSON("current.json")
 
 stance <- current$candidates
@@ -18,12 +22,14 @@ stance <- stance[stance$office == "Representative",]
 stance <- as.list(setNames(stance$stance, stance$race))
 ```
 
-```{r}
+```{r define-js-exports}
 ojs_define(future_states = current$futureStates)
 ojs_define(stance = stance)
 ```
 
-```{ojs}
+NOTE: If you toggle the light/dark theme, you need to refresh the page so it can re-read the saved local storage value. 
+
+```{ojs carto}
 {
   const svg = d3.create("svg").attr("width", 700).attr("height", 525);
 
@@ -102,11 +108,11 @@ ojs_define(stance = stance)
 }
 ```
 
-```{ojs}
+```{ojs carto-data}
 house_carto = FileAttachment("house_carto.json").json()
 ```
 
-```{ojs}
+```{ojs carto-css}
 css = html`<style>
 .district {
   stroke-width: 0.5;
