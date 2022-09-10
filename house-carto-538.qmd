@@ -27,7 +27,11 @@ ojs_define(future_states = current$futureStates)
 ojs_define(stance = stance)
 ```
 
-NOTE: If you toggle the light/dark theme from the upper-right-corner toggle, you need to refresh the page so it can re-read the saved local storage value. Use the button below to make it dynamic.
+```{ojs}
+runonce = {
+  document.querySelector(".quarto-color-scheme-toggle").style.display = 'none';
+}
+```
 
 ```{ojs}
 viewof toggle = Inputs.button("Toggle Light/Dark Mode")
@@ -39,7 +43,6 @@ color_mode = {
   window.quartoToggleColorScheme()
   return localStorage["quarto-color-scheme"]
 }
-
 ```
 
 ```{ojs carto}
